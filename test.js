@@ -194,7 +194,7 @@ async function publish(){
     await page.click('div.type-select.authority-select');
     await page.click('div.type-select.authority-select li');
 
-
+    await page.waitFor('.upload-ok',{visible: true});
     await page.click('div.submit-btn');
 
     let r ;
@@ -207,7 +207,7 @@ async function publish(){
     });
     console.log(`text: ${r}`);
     if(r){
-        r = await ding(isAtAll=true);
+        r = await ding(text=r, isAtAll=true);
         console.log(`ding: ${await r.text()}`);
     }
     
@@ -215,7 +215,12 @@ async function publish(){
 
 (async () => {
     for (let i=0;i<10;i++){
-        await publish();
+        try{
+            await publish();
+        }catch(err){
+            await ding(title='error', text=err, isAtAll=true)
+        }
+        
     }
     
 })()
