@@ -197,7 +197,7 @@ async function publish(){
     await page.waitFor('.upload-ok',{visible: true});
     await page.click('div.submit-btn');
 
-    let r ;
+    let r = 'not been uploading';
     await page.waitForResponse(async res => {
         // console.log(`url: ${res.url()}`);
         if(res.url() == 'https://www-test.xinpianchang.com/index.php?app=upload&ac=index&ts=do'){
