@@ -1,4 +1,5 @@
 const puppeteer = require('puppeteer-core');
+const CONFIG = require('./config');
 const { ding } = require('./ding');
 async function getBrowser(){
     const browser = await puppeteer.connect({
@@ -152,7 +153,7 @@ async function publish(){
     await page.goto('https://www-test.xinpianchang.com/upload/index/ts-upload_index?from=tab#',{waitUntil: 'networkidle2'});
     await page.reload();
     const file = await page.$('input[type="file"]');
-    await file.uploadFile('/Users/chensg/Movies/DJI 大僵创新 - 梦想启程.mp4');
+    await file.uploadFile(CONFIG.videoFile1);
     // (await page.$('#id-publish-img'))
     // await page.$eval(
     //     '#id-publish-img',
