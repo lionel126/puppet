@@ -1,0 +1,1 @@
+ssh -o ExitOnForwardFailure=yes -fNR 9222:127.0.0.1:9222 t
