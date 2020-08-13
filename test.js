@@ -198,15 +198,18 @@ async function publish(){
     await page.click('div.submit-btn');
 
     let r = 'not been uploading';
-    await page.waitForResponse(async res => {
+    let response ;
+    await page.waitForResponse(res => {
         // console.log(`url: ${res.url()}`);
         if(res.url() == 'https://www-test.xinpianchang.com/index.php?app=upload&ac=index&ts=do'){
-            r = await res.text();
+            response = res;
+            r = 'been uploaded, status not known'
             return true;
         }
     });
-    console.log(`text: ${r}`);
-    if(r){
+    const t = await response.text()
+    console.log(`text: ${t}`);
+    if(JSON.parse(t).status != 1){
         r = await ding(text=r, isAtAll=true);
         console.log(`ding: ${await r.text()}`);
     }
