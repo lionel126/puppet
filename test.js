@@ -147,11 +147,11 @@ async function register(){
 
 async function publish(){
     const browser = await getBrowser();
-    const page = (await browser.pages())[0];
+    // const page = (await browser.pages())[0];
     
-    // const page = await browser.newPage();
-    await page.goto('https://www-test.xinpianchang.com/upload/index/ts-upload_index?from=tab#',{waitUntil: 'networkidle2'});
-    await page.reload();
+    const page = await browser.newPage();
+    await page.goto(CONFIG.upload_web_url, {waitUntil: 'networkidle2'});
+    // await page.reload();
     const file = await page.$('input[type="file"]');
     await file.uploadFile(CONFIG.videoFile1);
     // (await page.$('#id-publish-img'))
@@ -172,7 +172,7 @@ async function publish(){
     );
     await uploadFrame.click('#xma_tab_2');
     // await uploadFrame.waitFor(1000);
-    await uploadFrame.type('#xma_ww_url', 'https://cn.bing.com/th?id=OHR.PRNLCavern_ZH-CN6078882650_1920x1080.jpg&rf=LaDigue_1920x1080.jpg&pid=hp');
+    await uploadFrame.type('#xma_ww_url', CONFIG.pic);
     await uploadFrame.click('#xma_ww_up');
     await uploadFrame.waitFor(1000);
     await uploadFrame.click('#xma_ww_ok');
@@ -194,37 +194,59 @@ async function publish(){
     await page.click('div.type-select.authority-select');
     await page.click('div.type-select.authority-select li');
 
+    await page.click('.extend-btn');
+    // 选中成员重复会出错
+    for(let j=1;j<=3;j++){
+        await page.type('.extent-member input', `${j}`);
+        await page.click('.extent-member .main-text');
+        await page.click('.extent-member input');
+        await page.waitFor(1000);
+        await page.click('.member-list li');
+        await page.waitFor(1000);
+        await page.click('.role-list li');
+        await page.waitFor(1000);
+        await page.click('div.roles-btn');
+    }
+    await page.waitFor(1000);
+
+
+    await page.click('p.publish-title');
     await page.waitFor('.upload-ok',{visible: true});
+    await page.waitFor(1000);
+    
     await page.click('div.submit-btn');
 
-    let r = 'not been uploading';
+
+    let status = 'not been uploading';
     let response ;
     await page.waitForResponse(res => {
         // console.log(`url: ${res.url()}`);
-        if(res.url() == 'https://www-test.xinpianchang.com/index.php?app=upload&ac=index&ts=do'){
+        if(res.url().indexOf('.xinpianchang.com/index.php?app=upload&ac=index&ts=do') > 10){
             response = res;
-            r = 'been uploaded, status not known'
+            status = 'been uploaded, status not known'
             return true;
         }
     });
     const t = await response.text()
-    console.log(`text: ${t}`);
+    console.log(`res.text: ${t}, status: ${status}`);
     if(JSON.parse(t).status != 1){
-        r = await ding(text=r, isAtAll=true);
-        console.log(`ding: ${await r.text()}`);
+        let tmp = await ding(text=`###${status}  \n${t}`, isAtAll=true);
+        console.log(`ding: ${await tmp.text()}`);
     }
     
 }
 
-(async () => {
-    for (let i=0;i<10;i++){
-        try{
-            await publish();
-        }catch(err){
-            await ding(title='error', text=err, isAtAll=true)
-        }
+publish()
+
+// (async () => {
+//     for (let i=0;i<1;i++){
+//         try{
+//             await publish();
+//         }catch(err){
+//             await ding(title='error', text=err.stack, isAtAll=true)
+//         }
         
-    }
+//     }
     
-})()
+// })()
 
