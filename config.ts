@@ -1,10 +1,11 @@
-const deepmerge = require('deepmerge')
+import deepmerge from 'deepmerge';
 
-let local = {}
+let local = {};
 try{
-    local = require('./config.local.js') || {}
+    local = require('./config.local').default;
+    // console.log(local)
 }catch(err){
-
+    console.log(err);
 }
 
 let CONFIG = {
@@ -14,7 +15,6 @@ let CONFIG = {
     // upload_api: 'https://www-test.xinpianchang.com/index.php?app=upload&ac=index&ts=do',
 
 }
-
-CONFIG = deepmerge(CONFIG, local)
-
-module.exports = CONFIG
+CONFIG = deepmerge(CONFIG, local);
+// console.log(CONFIG)
+export default CONFIG;

@@ -1,6 +1,7 @@
-const puppeteer = require('puppeteer-core');
-const CONFIG = require('./config');
-const { ding } = require('./ding');
+import puppeteer from 'puppeteer-core';
+import CONFIG from '../config';
+import { ding } from './ding';
+
 async function getBrowser(){
     const browser = await puppeteer.connect({
         // browserWSEndpoint: 'ws://127.0.0.1:9222/devtools/browser/75696ec0-1180-4482-851d-1d61c717b4dd',
@@ -51,9 +52,9 @@ async function upload(){
     const page = (await browser.pages())[0];
     await page.reload();
     const idType = await page.$('#idType');
-    await idType.click();
+    if(idType !== null) await idType.click();
     const idCard = await page.$('div.ant-select-dropdown:not(.ant-select-dropdown-hidden) li ');
-    await idCard.click();
+    if(idCard !== null) await idCard.click();
     const idf = await page.$('#idCardFrontSide');
     // await page.setRequestInterception(true);
     // page.on('request', request => {
@@ -69,7 +70,7 @@ async function upload(){
     // postData = JSON.stringify(j);
     // request.continue({postData});
     // });
-    await idf.uploadFile('/Users/chensg/workspace/xpctest/output/individual_verification.failed.png');
+    if(idf !== null) await idf.uploadFile('/Users/chensg/workspace/xpctest/output/individual_verification.failed.png');
     
 }
 
@@ -84,15 +85,17 @@ async function register(){
         console.log(`1rs layer frame name: ${f.name()}, url: ${f.url()}`);
         return true;
     });
-    console.log(`tframe: ${tframe}, url: ${(await tframe.content()).match('iframe')}`);
-    console.log((await tframe.content()).matchAll(/iframe/g));
+    if (tframe !== undefined){
+        console.log(`tframe: ${tframe}, url: ${(await tframe.content()).match('iframe')}`);
+        console.log((await tframe.content()).matchAll(/iframe/g));
 
-    const children = tframe.childFrames();
-    console.log(`children: ${children}`);
-
+        const children = tframe.childFrames();
+        console.log(`children: ${children}`);
+    }
     const mainFrame = page.mainFrame();
     console.log(`main frame: ${mainFrame}, ${mainFrame.url()}`)
-    const url = await page.evaluate(el => el.src, mainFrame);
+    // const url = await page.evaluate(el => el.src, mainFrame);
+    const url = await mainFrame.url();
     console.log(`url: ${url}`)
     const children2 = mainFrame.childFrames();
     console.log(`${children2.length}`);
@@ -153,7 +156,7 @@ async function publish(){
     await page.goto(CONFIG.upload_web_url, {waitUntil: 'networkidle2'});
     // await page.reload();
     const file = await page.$('input[type="file"]');
-    await file.uploadFile(CONFIG.videoFile1);
+    if(file !== null) await file.uploadFile(CONFIG.videoFile1);
     // (await page.$('#id-publish-img'))
     // await page.$eval(
     //     '#id-publish-img',
@@ -170,13 +173,14 @@ async function publish(){
     const uploadFrame = page.frames().find(
         f => f.name() == 'upload_frame'
     );
-    await uploadFrame.click('#xma_tab_2');
-    // await uploadFrame.waitFor(1000);
-    await uploadFrame.type('#xma_ww_url', CONFIG.pic);
-    await uploadFrame.click('#xma_ww_up');
-    await uploadFrame.waitFor(1000);
-    await uploadFrame.click('#xma_ww_ok');
-    
+    if (uploadFrame !== undefined){
+        await uploadFrame.click('#xma_tab_2');
+        // await uploadFrame.waitFor(1000);
+        await uploadFrame.type('#xma_ww_url', CONFIG.pic);
+        await uploadFrame.click('#xma_ww_up');
+        await uploadFrame.waitFor(1000);
+        await uploadFrame.click('#xma_ww_ok');
+    }
     await page.waitFor(1000);
     await page.click('#id-first');
     // await page.waitFor(1000);
@@ -218,7 +222,7 @@ async function publish(){
 
 
     let status = 'not been uploading';
-    let response ;
+    let response: puppeteer.Response | undefined ;
     await page.waitForResponse(res => {
         // console.log(`url: ${res.url()}`);
         if(res.url().indexOf('.xinpianchang.com/index.php?app=upload&ac=index&ts=do') > 10){
@@ -226,17 +230,21 @@ async function publish(){
             status = 'been uploaded, status not known'
             return true;
         }
+        return false;
     });
-    const t = await response.text()
-    console.log(`res.text: ${t}, status: ${status}`);
-    if(JSON.parse(t).status != 1){
-        let tmp = await ding(text=`###${status}  \n${t}`, isAtAll=true);
-        console.log(`ding: ${await tmp.text()}`);
+    if (response !== undefined){
+        const t = await response.text()
+        console.log(`res.text: ${t}, status: ${status}`);
+        if(JSON.parse(t).status != 1){
+            // let tmp = await ding(text=`###${status}  \n${t}`, isAtAll=true);
+            // console.log(`ding: ${await tmp.text()}`);
+        }
     }
+    
     
 }
 
-publish()
+publish().then(r=>console.log(r)).catch(e=>console.log(`error: ${e}`));
 
 // (async () => {
 //     for (let i=0;i<1;i++){

@@ -4,5 +4,9 @@
     "node-fetch": "^2.6.0",
     "puppeteer": "^5.2.1",
     "puppeteer-core": "^5.2.1"
+  },
+  "devDependencies": {
+    "@types/node-fetch": "^2.5.7",
+    "@types/puppeteer-core": "^2.0.0"
   }
 }
