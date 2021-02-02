@@ -1,4 +1,6 @@
-const httpProxy = require("http-proxy");
+import CONFIG from '../config'
+import httpProxy from "http-proxy"
+
 const HOST = "0.0.0.0";
 const PORT = 9223;
 async function createServer(WSEndPoint:string, host:string=HOST, port:number=PORT) {
@@ -12,4 +14,4 @@ async function createServer(WSEndPoint:string, host:string=HOST, port:number=POR
   return `ws://${host}:${port}`; // ie: ws://123.123.123.123:8080
 }
 
-createServer('ws://127.0.0.1:9222/devtools/browser/3c6a93e9-dd9d-49f2-a1c8-d41c6aaa75ae')
+createServer(CONFIG.chromeWsEndPoint)

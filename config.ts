@@ -16,7 +16,8 @@ let CONFIG = {
     upload_web_url: 'https://www-test.xinpianchang.com/upload/index/ts-upload_index?from=tab#',
     // upload_api: 'https://www-test.xinpianchang.com/index.php?app=upload&ac=index&ts=do',
     chromeExecutablePath: '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
-    chromeData: '/Users/csg/chrome_remote_user_data'
+    chromeData: '/Users/csg/chrome_remote_user_data',
+    chromeWsEndPoint: '',
 
 }
 CONFIG = deepmerge(CONFIG, local);
