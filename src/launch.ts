@@ -11,7 +11,7 @@ async function launch(){
             '--no-default-browser-check',
             `--user-data-dir=${CONFIG.chromeData}`,
             '--disable-features=site-per-process',
-            '--window-size=1920,980',
+            `--window-size=${CONFIG.chromeWindowSize}`,
             '--remote-debugging-port=9222'
         ]
     })

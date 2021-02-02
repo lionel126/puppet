@@ -18,6 +18,7 @@ let CONFIG = {
     chromeExecutablePath: '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
     chromeData: '/Users/csg/chrome_remote_user_data',
     chromeWsEndPoint: '',
+    chromeWindowSize: '1920,980',
 
 }
 CONFIG = deepmerge(CONFIG, local);
