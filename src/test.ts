@@ -1,8 +1,8 @@
-import puppeteer from 'puppeteer-core';
-import CONFIG from '../config';
-import { ding } from './ding';
-import { expect, assert } from 'chai';
-import logger from './logger';
+import puppeteer from 'puppeteer-core'
+import CONFIG from '../config'
+import { ding } from './ding'
+import { expect, assert } from 'chai'
+import logger from './logger'
 
 let browser: puppeteer.Browser;
 

@@ -1,15 +1,15 @@
 import puppeteer from 'puppeteer'
-
+import CONFIG from '../config'
 
 
 async function launch(){
     const browser = await puppeteer.launch({
         headless: false,
-        executablePath: '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
+        executablePath: CONFIG.chromeExecutablePath,
         args: [
             '--no-first-run',
             '--no-default-browser-check',
-            '--user-data-dir=/Users/csg/chrome_remote_user_data',
+            `--user-data-dir=${CONFIG.chromeData}`,
             '--disable-features=site-per-process',
             '--window-size=1920,980',
             '--remote-debugging-port=9222'
