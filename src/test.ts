@@ -1,20 +1,25 @@
 import puppeteer from 'puppeteer-core';
 import CONFIG from '../config';
 import { ding } from './ding';
+import { expect, assert } from 'chai';
+import logger from './logger';
+
+let browser: puppeteer.Browser;
 
 async function getBrowser(){
-    const browser = await puppeteer.connect({
+    browser = await puppeteer.connect({
         // browserWSEndpoint: 'ws://127.0.0.1:9222/devtools/browser/75696ec0-1180-4482-851d-1d61c717b4dd',
         browserURL: 'http://127.0.0.1:9222',
-        defaultViewport: {width: 1920, height: 1000},
+        defaultViewport: {width: 1920, height: 978},
     });
     return browser
     
 }
 
+
 async function nextPage () {
     
-    const browser = await getBrowser();
+    // const browser = await getBrowser();
     // const page = await browser.newPage();
     // await page.goto('https://www-test.xinpianchang.com/v2/fans?id=10002513', {waitUntil: 'networkidle0'});
     
@@ -36,7 +41,7 @@ async function nextPage () {
 
 
 async function followers(){
-    const browser = await getBrowser();
+    // const browser = await getBrowser();
     const page = (await browser.pages())[0];
     for (let i=10000065; i<10001000; i++){
         await page.goto(`https://www.xinpianchang.com/u/${i}/followers`, {waitUntil: 'networkidle0'});
@@ -48,7 +53,7 @@ async function followers(){
 
 
 async function upload(){
-    const browser = await getBrowser();
+    // const browser = await getBrowser();
     const page = (await browser.pages())[0];
     await page.reload();
     const idType = await page.$('#idType');
@@ -75,7 +80,7 @@ async function upload(){
 }
 
 async function register(){
-    const browser = await getBrowser();
+    // const browser = await getBrowser();
     const page = (await browser.pages())[0];
     console.log(`url: ${await page.url()}`);
     let fs = page.frames();
@@ -149,10 +154,11 @@ async function register(){
 }
 
 async function publish(){
-    const browser = await getBrowser();
+    // const browser = await getBrowser();
     // const page = (await browser.pages())[0];
     
     const page = await browser.newPage();
+    // const page = (await browser.pages())[0];
     await page.goto(CONFIG.upload_web_url, {waitUntil: 'networkidle2'});
     // await page.reload();
     const file = await page.$('input[type="file"]');
@@ -197,7 +203,8 @@ async function publish(){
     // await page.waitFor(1000);
     await page.click('div.type-select.authority-select');
     await page.click('div.type-select.authority-select li');
-
+// /* 
+    // 片中成员
     await page.click('.extend-btn');
     // 选中成员重复会出错
     for(let j=1;j<=3;j++){
@@ -212,39 +219,45 @@ async function publish(){
         await page.click('div.roles-btn');
     }
     await page.waitFor(1000);
-
+// */
 
     await page.click('p.publish-title');
     await page.waitFor('.upload-ok',{visible: true});
     await page.waitFor(1000);
+    await page.evaluate(() => {
+        const t = document.getElementById('j-title-input') as HTMLInputElement;
+        t.value = '';
+    });
+    await page.type('#j-title-input', `${new Date()}`.substr(0, 40));
     
     await page.click('div.submit-btn');
 
 
-    let status = 'not been uploading';
+    // let status = 'not been uploading';
     let response: puppeteer.Response | undefined ;
     await page.waitForResponse(res => {
         // console.log(`url: ${res.url()}`);
         if(res.url().indexOf('.xinpianchang.com/index.php?app=upload&ac=index&ts=do') > 10){
             response = res;
-            status = 'been uploaded, status not known'
+            // status = 'been uploaded, status not known'
             return true;
         }
         return false;
     });
     if (response !== undefined){
         const t = await response.text()
-        console.log(`res.text: ${t}, status: ${status}`);
+        // console.log(`res.text: ${t}, status: ${status}`);
+        // console.log(`res.text: ${t}`);
         if(JSON.parse(t).status != 1){
             // let tmp = await ding(text=`###${status}  \n${t}`, isAtAll=true);
             // console.log(`ding: ${await tmp.text()}`);
         }
     }
-    
+    return response;
     
 }
 
-publish().then(r=>console.log(r)).catch(e=>console.log(`error: ${e}`));
+// publish().then(r=>console.log(r)).catch(e=>console.log(`error: ${e}`));
 
 // (async () => {
 //     for (let i=0;i<1;i++){
@@ -258,3 +271,98 @@ publish().then(r=>console.log(r)).catch(e=>console.log(`error: ${e}`));
     
 // })()
 
+
+async function uploadRes() {
+    // const browser = await getBrowser();
+    
+    const page = (await browser.pages())[0];
+    for(let i=0;i<10;i++){
+        console.debug('>>>>>>>>');
+        await page.reload();
+        // await page.reload();
+        await page.click('span.copyright');
+        let amount_before = (await page.$$('.video-upload-item')).length;
+        console.debug(`上传前数量：${amount_before}`);
+        // const page = await browser.newPage();
+        // await page.goto(CONFIG.upload_web_url, {waitUntil: 'networkidle2'});
+        // await page.reload();
+        // console.debug('find element...');
+        const file = await page.$('input[type="file"]');
+        // console.debug('to upload');
+        await file?.uploadFile(CONFIG.videoFile2); 
+            
+        
+        await page.waitFor(2000);
+        const uploads = await page.$$('.video-upload-item')
+        let amount_after = uploads.length;
+        console.debug(`上传后数量：${amount_after}`);
+        if(amount_after > amount_before){
+            await page.waitForFunction(
+                (idx) => {
+                    let elem = document.querySelectorAll('.video-upload-item')[idx];
+                    console.log(idx, elem.textContent);
+                    let status = elem.querySelector('.status-info-uploaded');
+                    return status?.textContent == '上传已完成 ';                    
+                },
+                {},
+                amount_after - 1
+            );
+        }else{
+            continue;
+        }
+        console.debug('<<<<<<<');
+    }
+    console.log('over');
+}
+
+
+
+async function delUploaded() {
+    // const browser = await getBrowser();
+    
+    const page = (await browser.pages())[0];
+    for(let i=0;i<10;i++){
+        const btn = await page.$('.icon-del');
+        await btn?.click();
+        await page.waitFor(500);
+        (await page.$('button.el-button--primary'))?.click()
+        await page.waitFor(500);
+    }
+    console.log('over');
+}
+
+async function submit(){
+    // const browser = await getBrowser();
+    const page = (await browser.pages())[0];
+    for(let i=0;i<10;i++){
+        (await page.$('button.video-upload-item-submit:not([disabled=disabled])'))?.click();
+        await page.waitForSelector('div.el-dialog__wrapper',{visible: true})
+        
+    }
+    console.log('over');
+}
+
+describe('sns', function(){
+    // let browser;
+    before(async function(){
+        browser = await getBrowser();
+    });
+    after(function(){
+        browser.disconnect();
+    });
+
+    it('publish article', async function(){
+        const res = await publish();
+        const text = await res?.text();
+        expect(text).is.not.null;
+        if(text != null){
+            logger.debug(`${text}`);
+            // expect(JSON.parse(text).status).to.equal(1);
+            assert.equal(JSON.parse(text).status, 1);
+        }
+        
+    });
+});
+// publish()
+// uploadRes()
+// delUploaded()
