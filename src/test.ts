@@ -10,6 +10,7 @@ async function getBrowser(){
     browser = await puppeteer.connect({
         // browserWSEndpoint: 'ws://127.0.0.1:9222/devtools/browser/75696ec0-1180-4482-851d-1d61c717b4dd',
         browserURL: 'http://127.0.0.1:9222',
+        // browserURL: 'http://192.168.102.54:9222',
         defaultViewport: {width: 1920, height: 978},
     });
     return browser
@@ -234,8 +235,8 @@ async function publish(){
 
 
     // let status = 'not been uploading';
-    let response: puppeteer.Response | undefined ;
-    await page.waitForResponse(res => {
+    let response: puppeteer.HTTPResponse | undefined ;
+    await page.waitForResponse((res:puppeteer.HTTPResponse) => {
         // console.log(`url: ${res.url()}`);
         if(res.url().indexOf('.xinpianchang.com/index.php?app=upload&ac=index&ts=do') > 10){
             response = res;
@@ -298,7 +299,7 @@ async function uploadRes() {
         console.debug(`上传后数量：${amount_after}`);
         if(amount_after > amount_before){
             await page.waitForFunction(
-                (idx) => {
+                (idx:number) => {
                     let elem = document.querySelectorAll('.video-upload-item')[idx];
                     console.log(idx, elem.textContent);
                     let status = elem.querySelector('.status-info-uploaded');
@@ -342,6 +343,15 @@ async function submit(){
     console.log('over');
 }
 
+async function publishArticleNew() {
+    const page = await browser.newPage();
+    await page.goto('https://www-test.xinpianchang.com/u/upload/video/public', {waitUntil: 'networkidle2'});
+
+    await (await page.$('input[type="file"]'))?.uploadFile(CONFIG.videoFile1);
+    // const file = await page.$('input[type="file"]');
+    // if(file !== null) await file.uploadFile(CONFIG.videoFile1);
+}
+
 describe('sns', function(){
     // let browser;
     before(async function(){
@@ -351,7 +361,7 @@ describe('sns', function(){
         browser.disconnect();
     });
 
-    it('publish article', async function(){
+    it('publish article old', async function(){
         const res = await publish();
         const text = await res?.text();
         expect(text).is.not.null;
@@ -362,6 +372,15 @@ describe('sns', function(){
         }
         
     });
+
+    it('publish article new', async function () {
+        await publishArticleNew()
+    })
+    it('realname certificate test', async function(){
+        const page = (await browser.pages())[0]
+        await page.type('#realname', 'puppeteer 真实姓名 ')
+        await (await page.$('input#credentialInHand'))?.uploadFile(CONFIG.picFile)
+    })
 });
 // publish()
 // uploadRes()

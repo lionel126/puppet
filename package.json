@@ -6,8 +6,8 @@
     "http-proxy": "^1.18.1",
     "mocha": "^8.2.0",
     "node-fetch": "^2.6.0",
-    "puppeteer": "^5.2.1",
-    "puppeteer-core": "^5.2.1",
+    "puppeteer": "^7.1.0",
+    "puppeteer-core": "^7.1.0",
     "winston": "^3.3.3",
     "winston-daily-rotate-file": "^4.5.0"
   },
@@ -16,7 +16,7 @@
     "@types/http-proxy": "^1.17.5",
     "@types/mocha": "^8.0.3",
     "@types/node-fetch": "^2.5.7",
-    "@types/puppeteer-core": "^2.0.0",
+    "@types/puppeteer-core": "^5.4.0",
     "source-map-support": "^0.5.19",
     "ts-node": "^9.1.1",
     "typescript": "^4.0.3"
@@ -27,6 +27,9 @@
     "t": "cd built;mocha --require source-map-support/register --timeout 60000 src/test.js",
     "bt": "yarn build;yarn t",
     "launch": "ts-node src/launch",
-    "serve": "ts-node src/server"
+    "serve": "useless, file uploading does not work on remote Chrome;ts-node src/server",
+    "r": "NODE_PATH='.' mocha --timeout 60000 --require ts-node/register ./test/xpc.ts",
+    "o": "NODE_PATH='.' mocha --timeout 60000 --require ts-node/register ./test/xpc_old.ts",
+    "pub": "NODE_PATH='.' mocha --timeout 60000 --require ts-node/register ./test/publish.ts"
   }
 }
